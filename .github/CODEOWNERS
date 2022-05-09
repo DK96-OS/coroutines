@@ -1,0 +1,18 @@
+
+# Control GitHub files and workflows
+.github/	@dk96-os
+
+# Control License
+LICENSE		@dk96-os
+
+# Control Gitignore
+.gitignore	@dk96-os
+
+# Control ReadMe
+README.md	@dk96-os
+
+# Control Gradle Files
+gradle/ @dk96-os
+build.gradle* @dk96-os
+settings.gradle* @dk96-os
+dependencies.gradle* @dk96-os

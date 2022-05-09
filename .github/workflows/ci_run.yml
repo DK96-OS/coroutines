@@ -1,0 +1,46 @@
+# This workflow tests master branch pushes and pull requests
+
+name: CI Run
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+      - 'release-[0-1].[0-9]+.?[0-9]?'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    
+    name: CI Run
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Java
+      uses: actions/setup-java@v2
+      with:
+        java-version: 11
+        distribution: 'temurin'
+        cache: 'gradle'
+    - name: Build
+      run: ./gradlew assemble --info
+      timeout-minutes: 4
+  
+  test:
+    needs: build
+    uses: ./.github/workflows/test_report.yml
+    if: success()
+  
+  coverage-report:
+    needs: test
+    uses: ./.github/workflows/coverage_report.yml
+    if: success()
+  
+  verify-coverage:
+    needs: test
+    uses: ./.github/workflows/coverage_verification.yml
+    if: success()

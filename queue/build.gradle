@@ -1,0 +1,85 @@
+plugins {
+	id "org.jetbrains.kotlin.jvm"
+	id "jacoco"
+	id "org.jetbrains.dokka" version "1.6.10"
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_1_8
+	targetCompatibility = JavaVersion.VERSION_1_8
+	withJavadocJar()
+	withSourcesJar()
+}
+
+tasks.sourcesJar {
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			groupId = "io.github.dk96-os.coroutines"
+			artifactId = "queue"
+			version = "0.1"
+			from components.java
+		}
+	}
+}
+
+dependencies {
+	// Coroutine support
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.1"
+    
+    // JUnit 5
+    testImplementation platform("org.junit:junit-bom:5.7.2")
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testImplementation "org.junit.jupiter:junit-jupiter-params"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+}
+
+sourceSets.main {
+	java.srcDirs("src/main/kotlin")
+}
+
+tasks.test {
+    useJUnitPlatform() {
+        excludeTags("slow")
+    }
+	maxParallelForks = 3
+	testLogging {
+        events("passed", "failed") // not including "skipped"
+    }
+    reports {
+    	junitXml {
+    		outputPerTestCase = true
+    		mergeReruns = true
+    	}
+    }
+}
+
+tasks.jacocoTestReport {
+	dependsOn tasks.test
+	reports {
+		xml.required = false
+		csv.required = false
+		html.outputLocation = layout.buildDirectory.dir("jacocoReport")
+	}
+}
+
+tasks.jacocoTestCoverageVerification {
+	dependsOn tasks.test
+	violationRules {
+		failOnViolation = true
+		rule {
+			limit {
+				counter = "INSTRUCTION"
+				minimum = 0.8
+			}
+			limit {
+				counter = "BRANCH"
+				minimum = 0.8
+			}
+		}
+	}
+}
