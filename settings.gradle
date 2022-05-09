@@ -17,7 +17,7 @@ pluginManagement {
 	    gradlePluginPortal()
 	}
 }
-rootProject.name = "coroutine"
+rootProject.name = "coroutines"
 include(
 	":queue",
 )
