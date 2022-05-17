@@ -169,7 +169,34 @@ class CoroutineQueueTest {
 					64, out.title.length)
 		}
 	}
-	
+
+	@Test
+	fun testTransformListSingleItem() {
+		val input = listOf(
+			InputData(77, byteArrayOf(5, 7, 9, 3))
+		)
+		runBlocking {
+			val result = CoroutineQueue.transformList(input) {
+				it.transform()
+			}
+			assertEquals(
+				1, result.size)
+			assertEquals(
+				77, result[0].key)
+		}
+	}
+
+	@Test
+	fun testTransformListEmptyList() {
+		runBlocking {
+			val result = CoroutineQueue.transformList(emptyList<InputData>()) {
+				it.transform()
+			}
+			assertEquals(
+				0, result.size)
+		}
+	}
+
 	@Test
     fun testTransformNullability() {
 		runBlocking {
