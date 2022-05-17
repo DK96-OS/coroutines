@@ -13,6 +13,7 @@ import kotlin.collections.ArrayList
  * @author DK96-OS : 2021 - 2022
  */
 class CoroutineQueue<T>(
+	/** The maximum number of coroutines allowed in the queue at one time. */
 	val capacity: Int,
 ) {
 	
@@ -28,7 +29,7 @@ class CoroutineQueue<T>(
 	 * @return True if the queue allowed the task to be added (didn't exceed capacity) */
 	fun add(
 		task: Deferred<T?>
-	) = mQueue.offer(task)
+	) : Boolean = mQueue.offer(task)
 
 	/** Block until next coroutine finishes, 
 	  * @return null if empty queue or task result is nullable  */
@@ -36,12 +37,14 @@ class CoroutineQueue<T>(
 	: T? = mQueue.poll()?.await()
 
 	/** Await each element in the queue, add it to a list and return the list */
-	suspend fun awaitList(): ArrayList<T> {
+	suspend fun awaitList()
+	: ArrayList<T> {
 		var task: Deferred<T?>? = mQueue.poll()
 		val list = ArrayList<T>(mQueue.count())
 		while (task != null) {
 			val result = task.await()
-			if (result != null) list.add(result)
+			if (result != null)
+				list.add(result)
 			task = mQueue.poll()
 		}
 		return list
@@ -65,8 +68,12 @@ class CoroutineQueue<T>(
 	}
 
 	companion object {
-		/** Applies a suspendable transformation on a list using the CoroutineQueue
-		 * Skips using CoroutineQueue if input size is less than 2 */
+		/** Applies a suspendable transformation on a list using the CoroutineQueue.
+		 * Skips using CoroutineQueue if input size is less than 2.
+		 * @param input The input List to run a transformation on.
+		 * @param transform The suspending transformation operation.
+		 * @return A new ArrayList containing the non-null transformation products.
+		 */
 		suspend fun <A, B> transformList(
 			input: List<A>,
 			transform: suspend (A) -> B?
@@ -82,10 +89,12 @@ class CoroutineQueue<T>(
 				}
 				return queue.awaitList()
 			} else if (input.size == 1) {
+				// The input list has only one element
 				val result = transform(input[0])
 				if (result != null)
 					return arrayListOf(result)
 			}
+			// By default, return new empty ArrayList
 			return ArrayList(0)
 		}
 	}
