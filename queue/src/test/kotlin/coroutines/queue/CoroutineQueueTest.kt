@@ -81,6 +81,25 @@ class CoroutineQueueTest {
 	}
 
 	@Test
+	fun testAwaitAll() {
+		// Await All does not return a value
+		runBlocking {
+			// Load results into this arrayList
+			val array = ArrayList<OutputData>(capacity)
+			// Start Coroutines
+			for (i in inputList) queue.add(async {
+				val output = i.transform()
+				array.add(output)
+				output
+			})
+			// Await
+			queue.awaitAll()
+			assertEquals(
+				capacity, array.size)
+		}
+	}
+
+	@Test
     fun testAwaitNext() {
 		runBlocking {
 			for (i in inputList) queue.add(async {
