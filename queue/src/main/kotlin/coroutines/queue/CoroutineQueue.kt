@@ -13,6 +13,7 @@ import kotlin.collections.ArrayList
  * @author DK96-OS : 2021 - 2022
  */
 class CoroutineQueue<T>(
+	/** The maximum number of coroutines allowed in the queue at one time. */
 	val capacity: Int,
 ) {
 	
@@ -67,8 +68,12 @@ class CoroutineQueue<T>(
 	}
 
 	companion object {
-		/** Applies a suspendable transformation on a list using the CoroutineQueue
-		 * Skips using CoroutineQueue if input size is less than 2 */
+		/** Applies a suspendable transformation on a list using the CoroutineQueue.
+		 * Skips using CoroutineQueue if input size is less than 2.
+		 * @param input The input List to run a transformation on.
+		 * @param transform The suspending transformation operation.
+		 * @return A new ArrayList containing the non-null transformation products.
+		 */
 		suspend fun <A, B> transformList(
 			input: List<A>,
 			transform: suspend (A) -> B?
@@ -84,10 +89,12 @@ class CoroutineQueue<T>(
 				}
 				return queue.awaitList()
 			} else if (input.size == 1) {
+				// The input list has only one element
 				val result = transform(input[0])
 				if (result != null)
 					return arrayListOf(result)
 			}
+			// By default, return new empty ArrayList
 			return ArrayList(0)
 		}
 	}
