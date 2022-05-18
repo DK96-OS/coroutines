@@ -48,6 +48,6 @@ jobs:
         with:
           name: JavaDocs-${{ matrix.java }}
           path: |
-            /home/runner/work/coroutines/queue/lists/build/dokka/
+            /home/runner/work/coroutines/coroutines/queue/build/dokka/
           retention-days: 60
         timeout-minutes: 1
