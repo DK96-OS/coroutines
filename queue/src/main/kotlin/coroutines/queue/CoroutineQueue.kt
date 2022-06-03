@@ -68,6 +68,7 @@ class CoroutineQueue<T>(
 	}
 
 	companion object {
+
 		/** Applies a suspendable transformation on a list using the CoroutineQueue.
 		 * Skips using CoroutineQueue if input size is less than 2.
 		 * @param input The input List to run a transformation on.
@@ -97,5 +98,37 @@ class CoroutineQueue<T>(
 			// By default, return new empty ArrayList
 			return ArrayList(0)
 		}
+
+		/** Applies a suspendable transformation on an array using CoroutineQueue.
+		 * Skips instantiating CoroutineQueue if input size is less than 2.
+		 * @param input The input List to run a transformation on.
+		 * @param transform The suspending transformation operation.
+		 * @return A new ArrayList containing the non-null transformation products.
+		 */
+		suspend fun <A, B> transformArray(
+			input: Array<A>,
+			transform: suspend (A) -> B?
+		) : ArrayList<B> {
+			if (input.size < 2) {
+				if (input.size == 1) {
+					val result = transform(input[0])
+					if (result != null)
+						return arrayListOf(result)
+				}
+			} else {
+				val queue = CoroutineQueue<B>(input.size)
+				coroutineScope {
+					input.forEach { a ->
+						queue.add(async(Dispatchers.IO) {
+							transform(a)
+						})
+					}
+				}
+				return queue.awaitList()
+			}
+			// By default, return new empty ArrayList
+			return ArrayList(0)
+		}
 	}
+
 }
