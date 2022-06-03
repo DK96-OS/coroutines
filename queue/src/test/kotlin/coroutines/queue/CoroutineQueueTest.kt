@@ -2,9 +2,9 @@ package coroutines.queue
 
 import coroutines.examples.InputData
 import coroutines.examples.OutputData
+import coroutines.examples.TestDataProvider
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -12,30 +12,27 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.math.roundToInt
-import kotlin.random.Random
 
 /** Test suite for CoroutineQueue
  * @author DK96-OS : 2021 - 2022
  */
 class CoroutineQueueTest {
 
-	/** The capacity is the size of the input list */
-	private val capacity = 1000
+	private val provider = TestDataProvider()
 
+	/** The capacity is the size of the input list.
+	 */
+	private val capacity = 400
+
+	/** A CoroutineQueue instance created before each test.
+	 */
 	private lateinit var queue: CoroutineQueue<OutputData>
 
-  	/** Generate immutable input data to be used in all tests */
-	private val inputList: List<InputData> = Array(capacity) {
-	    InputData(
-			stream = Random
-				.nextBytes(64)
-				.sortedArray(),	// sort to avoid string init issues
-			key = Random
-				.nextInt()
-				.ushr(25)	// shift to remove negatives
-				.toByte()
-		)
-    }.toList()
+  	/** An immutable input data to be used in tests.
+     */
+	private val inputList: List<InputData> = provider.createInput(
+	    capacity, 300
+    ).toList()
 
 	@BeforeEach
 	fun setup() {
@@ -151,79 +148,9 @@ class CoroutineQueueTest {
 				capacity, output.size)
 			for (out in output)
 				assertEquals(
-					64, out.title.length)
-		}
-	}
-  
-	@Test
-    fun testTransformListFunction() {
-		runBlocking {
-			val output = CoroutineQueue.transformList(inputList) {
-				delay(20)
-				it.transform()
-			}
-			assertEquals(
-				capacity, output.size)
-			for (out in output)
-				assertEquals(
-					64, out.title.length)
+					64, out.title.length
+				)
 		}
 	}
 
-	@Test
-	fun testTransformListSingleItem() {
-		val input = listOf(
-			InputData(77, byteArrayOf(5, 7, 9, 3))
-		)
-		runBlocking {
-			val result = CoroutineQueue.transformList(input) {
-				it.transform()
-			}
-			assertEquals(
-				1, result.size)
-			assertEquals(
-				77, result[0].key)
-		}
-	}
-
-	@Test
-	fun testTransformListEmptyList() {
-		runBlocking {
-			val result = CoroutineQueue.transformList(emptyList<InputData>()) {
-				it.transform()
-			}
-			assertEquals(
-				0, result.size)
-		}
-	}
-
-	@Test
-    fun testTransformNullability() {
-		runBlocking {
-			val nullTestInputs = listOf(
-				1, 2, 3, 4, 5, 6
-			)
-			val output = CoroutineQueue.transformList(
-				nullTestInputs
-			) {
-				when {
-					it % 2 == 0 -> "Even"
-					it % 3 == 0 -> "Three"
-					else -> null
-				}
-			}
-				// 1 is removed because null
-			assertEquals(
-				"Even", output[0])		// Two is even
-			assertEquals(
-				"Three", output[1]) 	// Three
-			assertEquals(
-				"Even", output[2])		// Four is even
-				// Five is null
-			assertEquals(
-				"Even", output[3])		// Six is even
-			assertEquals(
-				4, output.size)
-		}
-	}
 }
