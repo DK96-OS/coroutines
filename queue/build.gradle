@@ -20,7 +20,7 @@ publishing {
 		maven(MavenPublication) {
 			groupId = "io.github.dk96-os.coroutines"
 			artifactId = "queue"
-			version = "0.2.1"
+			version = "0.3"
 			from components.java
 		}
 	}
