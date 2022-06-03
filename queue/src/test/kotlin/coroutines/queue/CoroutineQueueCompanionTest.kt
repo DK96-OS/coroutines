@@ -1,6 +1,7 @@
 package coroutines.queue
 
 import coroutines.examples.InputData
+import coroutines.examples.OutputData
 import coroutines.examples.TestDataProvider
 import coroutines.queue.CoroutineQueue.Companion.transformArray
 import coroutines.queue.CoroutineQueue.Companion.transformList
@@ -57,6 +58,24 @@ class CoroutineQueueCompanionTest {
 			)
 			assertEquals(
 				77, result[0].key
+			)
+		}
+	}
+
+	@Test
+	fun testTransformListSingleItemToNull() {
+		val input = listOf(
+			InputData(
+				77, byteArrayOf(45, 23)
+			)
+		)
+		runBlocking {
+			val result: ArrayList<OutputData> = transformList(input) {
+				it.transform()
+				null
+			}
+			assertEquals(
+				0, result.size
 			)
 		}
 	}
@@ -120,6 +139,45 @@ class CoroutineQueueCompanionTest {
 				assertEquals(
 					64, out.title.length
 				)
+		}
+	}
+
+	@Test
+	fun testTransformArraySingle() {
+		val input = Array(1) {
+			InputData(77, byteArrayOf(4, 2, 4, 6))
+		}
+		runBlocking {
+			val output = transformArray(input) {
+				it.transform()
+			}
+			assertEquals(
+				1, output.size
+			)
+			val expectedOutput = input[0].transform()
+			assertEquals(
+				expectedOutput.key,
+				output[0].key
+			)
+			assertEquals(
+				expectedOutput.title,
+				output[0].title
+			)
+		}
+	}
+
+	@Test
+	fun testTransformArraySingleNull() {
+		val input = Array(1) {
+			InputData(77, byteArrayOf(4, 2, 4, 6))
+		}
+		runBlocking {
+			val output: ArrayList<OutputData> = transformArray(input) {
+				null
+			}
+			assertEquals(
+				0, output.size
+			)
 		}
 	}
 
