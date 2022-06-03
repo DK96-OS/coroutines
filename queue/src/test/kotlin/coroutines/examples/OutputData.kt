@@ -2,7 +2,7 @@ package coroutines.examples
 
 /** Data structure for coroutine output
  */
-class OutputData(
+data class OutputData(
 	val key: Byte,
 	val title: String
 ) {
