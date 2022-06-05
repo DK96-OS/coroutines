@@ -7,7 +7,6 @@ import kotlinx.coroutines.coroutineScope
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.CancellationException
-import kotlin.collections.ArrayList
 
 /** A Queue for organizing asynchronous coroutines.
  * @author DK96-OS : 2021 - 2022
@@ -61,7 +60,7 @@ class CoroutineQueue<T>(
 	suspend fun awaitAll(
 	) : Int {
 	    // Count the number of tasks that are waited for.
-	    var taskCount: Int = 0
+	    var taskCount = 0
 	    // Get the next Task in the Queue
 		var task: Deferred<T?>? = mQueue.poll()
 		while (task != null) {
@@ -80,9 +79,15 @@ class CoroutineQueue<T>(
 	 */
 	fun cancel(
 		cause: CancellationException? = null,
-	) {
-		mQueue.forEach { it.cancel(cause) }
-		mQueue.clear()
+	) : Int {
+		var counter = 0
+		var task = mQueue.poll()
+		while (task != null) {
+			task.cancel(cause)
+			++counter
+			task = mQueue.poll()
+		}
+		return counter
 	}
 
 	companion object {
