@@ -1,6 +1,10 @@
 package coroutines.queue
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.CancellationException
@@ -101,23 +105,22 @@ class CoroutineQueue<T>(
 		 * @param transform The suspending transformation operation.
 		 * @return A new ArrayList containing the non-null transformation products.
 		 */
-		suspend fun <A, B> transformList(
+		fun <A, B> transformList(
+			coroutineScope: CoroutineScope,
 			input: List<A>,
 			transform: suspend (A) -> B?
 		) : ArrayList<B> {
 			if (1 < input.size) {
 				val queue = CoroutineQueue<B>(input.size)
-				supervisorScope {
-					input.forEach { a ->
-						queue.add(async(Dispatchers.IO) {
-							transform(a)
-						})
-					}
+				input.forEach { a ->
+					queue.add(coroutineScope.async(Dispatchers.IO) {
+						transform(a)
+					})
 				}
-				return queue.awaitList()
+				return runBlocking { queue.awaitList() }
 			} else if (input.size == 1) {
 				// The input list has only one element
-				val result = transform(input[0])
+				val result = runBlocking { transform(input[0]) }
 				if (result != null)
 					return arrayListOf(result)
 			}

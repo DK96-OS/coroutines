@@ -33,7 +33,7 @@ class CoroutineQueueCompanionTest {
 	@Test
 	fun testTransformListEmptyList() {
 		runBlocking {
-			val result = transformList(emptyList<InputData>()) {
+			val result = transformList(this, emptyList<InputData>()) {
 				it.transform()
 			}
 			assertEquals(
@@ -50,7 +50,7 @@ class CoroutineQueueCompanionTest {
 			)
 		)
 		runBlocking {
-			val result = transformList(input) {
+			val result = transformList(this, input) {
 				it.transform()
 			}
 			assertEquals(
@@ -70,7 +70,7 @@ class CoroutineQueueCompanionTest {
 			)
 		)
 		runBlocking {
-			val result: ArrayList<OutputData> = transformList(input) {
+			val result: ArrayList<OutputData> = transformList(this, input) {
 				it.transform()
 				null
 			}
@@ -83,7 +83,7 @@ class CoroutineQueueCompanionTest {
 	@Test
 	fun testTransformListFunction() {
 		runBlocking {
-			val output = transformList(inputList) {
+			val output = transformList(this, inputList) {
 				it.transform()
 			}
 			assertEquals(
@@ -103,6 +103,7 @@ class CoroutineQueueCompanionTest {
 				1, 2, 3, 4, 5, 6
 			)
 			val output = transformList(
+				this,
 				nullTestInputs
 			) {
 				when {
