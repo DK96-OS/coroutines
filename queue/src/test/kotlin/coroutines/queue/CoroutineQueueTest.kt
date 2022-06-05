@@ -9,6 +9,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.math.roundToInt
@@ -104,6 +105,15 @@ class CoroutineQueueTest {
 	}
 
 	@Test
+	fun testAwaitAllEmptyQueue() {
+		runBlocking {
+			assertEquals(
+				0, queue.awaitAll()
+			)
+		}
+	}
+
+	@Test
     fun testAwaitNext() {
 		runBlocking {
 			for (i in inputList) queue.add(async {
@@ -121,7 +131,7 @@ class CoroutineQueueTest {
 	}
 
 	@Test
-    fun testCancel() {
+	fun testCancelAll() {
 		runBlocking {
 			for (i in inputList) queue.add(async {
 				i.transform()
@@ -141,6 +151,30 @@ class CoroutineQueueTest {
 			)
 			assertNull(
 				queue.awaitNext()
+			)
+		}
+	}
+
+	@Test
+    fun testCancelSingle() {
+		val input = inputList[0]
+		runBlocking {
+			val task = async {
+				input.transform()
+			}
+			queue.add(task)
+			assertEquals(
+				1, queue.count
+			)
+			// Cancel and check Task result
+			val exception = CancellationException("Testing Cancel Operation")
+			queue.cancel(exception)
+			//
+			assertTrue(
+				task.isCancelled
+			)
+			assertEquals(
+				0, queue.count
 			)
 		}
 	}
