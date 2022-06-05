@@ -50,13 +50,24 @@ class CoroutineQueue<T>(
 		return list
 	}
 
-    /** Block thread until queue is empty */
-	suspend fun awaitAll() {
+    /** Wait for a group of tasks to complete.
+     * @return The number of tasks that were waited on.
+     */
+	suspend fun awaitAll(
+	) : Int {
+	    // Count the number of tasks that are waited for.
+	    var taskCount: Int = 0
+	    // Get the next Task in the Queue
 		var task: Deferred<T?>? = mQueue.poll()
 		while (task != null) {
+			// Wait for the task to complete
 			task.await()
+			// Increment the counter
+			++taskCount
+			// Get the next task
 			task = mQueue.poll()
 		}
+	    return taskCount
 	}
 
 	/** Tries to cancel everything in the queue */
