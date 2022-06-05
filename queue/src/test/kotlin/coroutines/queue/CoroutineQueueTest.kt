@@ -140,11 +140,15 @@ class CoroutineQueueTest {
 				inputList[0].key,
 				queue.awaitNext()!!.key
 			)
+			val remainingTasks = capacity - 1
 			assertEquals(
-				capacity - 1, queue.count
+				remainingTasks, queue.count
 			)
-			queue.cancel(
+			val cancelledTasks = queue.cancel(
 				CancellationException("Testing Cancel Operation")
+			)
+			assertEquals(
+				remainingTasks, cancelledTasks
 			)
 			assertEquals(
 				0, queue.count
@@ -168,8 +172,9 @@ class CoroutineQueueTest {
 			)
 			// Cancel and check Task result
 			val exception = CancellationException("Testing Cancel Operation")
-			queue.cancel(exception)
-			//
+			assertEquals(
+				1, queue.cancel(exception)
+			)
 			assertTrue(
 				task.isCancelled
 			)
@@ -177,6 +182,13 @@ class CoroutineQueueTest {
 				0, queue.count
 			)
 		}
+	}
+
+	@Test
+	fun testCancelEmptyQueue() {
+		assertEquals(
+			0, queue.cancel()
+		)
 	}
 
 	@Test
