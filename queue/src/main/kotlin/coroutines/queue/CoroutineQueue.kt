@@ -3,7 +3,7 @@ package coroutines.queue
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.supervisorScope
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.CancellationException
@@ -110,7 +110,7 @@ class CoroutineQueue<T>(
 		) : ArrayList<B> {
 			if (1 < input.size) {
 				val queue = CoroutineQueue<B>(input.size)
-				coroutineScope {
+				supervisorScope {
 					input.forEach { a ->
 						queue.add(async(Dispatchers.IO) {
 							transform(a)
@@ -146,7 +146,7 @@ class CoroutineQueue<T>(
 				}
 			} else {
 				val queue = CoroutineQueue<B>(input.size)
-				coroutineScope {
+				supervisorScope {
 					input.forEach { a ->
 						queue.add(async(Dispatchers.IO) {
 							transform(a)
