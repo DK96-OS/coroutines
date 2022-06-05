@@ -25,18 +25,22 @@ class CoroutineQueue<T>(
 	val count: Int
 		get() = mQueue.size
 	
-	/** Add a deferred result to the Queue
-	 * @return True if the queue allowed the task to be added (didn't exceed capacity) */
+	/** Add a deferred result to the Queue.
+	 * @return True if the queue allowed the task to be added (didn't exceed capacity)
+	 */
 	fun add(
 		task: Deferred<T?>
 	) : Boolean = mQueue.offer(task)
 
 	/** Block until next coroutine finishes, 
-	  * @return null if empty queue or task result is nullable  */
+	 * @return null if empty queue or task result is nullable.
+	 */
 	suspend fun awaitNext()
 	: T? = mQueue.poll()?.await()
 
-	/** Await each element in the queue, add it to a list and return the list */
+	/** Await each element in the queue, add it to a list and return the list
+	 * @return An ArrayList containing the results of all tasks in the queue.
+	 */
 	suspend fun awaitList()
 	: ArrayList<T> {
 		var task: Deferred<T?>? = mQueue.poll()
