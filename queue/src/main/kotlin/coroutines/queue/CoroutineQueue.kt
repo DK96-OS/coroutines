@@ -76,18 +76,24 @@ class CoroutineQueue<T>(
 
 	/** Tries to cancel everything in the queue.
 	 * @param cause An Exception to be passed to all cancelled tasks.
+	 * @return The number of tasks that were cancelled.
 	 */
 	fun cancel(
 		cause: CancellationException? = null,
 	) : Int {
-		var counter = 0
+		// Count the number of affected tasks
+		var taskCount = 0
+		// Get and cancel all tasks
 		var task = mQueue.poll()
 		while (task != null) {
+			// Cancel this task
 			task.cancel(cause)
-			++counter
+			// Increment the counter
+			++taskCount
+			// Get the next task
 			task = mQueue.poll()
 		}
-		return counter
+		return taskCount
 	}
 
 	companion object {
