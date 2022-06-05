@@ -56,9 +56,11 @@ class CoroutineQueue<T>(
 	}
 
     /** Wait for a group of tasks to complete.
+     * @param limit The maximum number of tasks to wait for. zero is unlimited.
      * @return The number of tasks that were waited on.
      */
 	suspend fun awaitAll(
+	    limit: Int = 0,
 	) : Int {
 	    // Count the number of tasks that are waited for.
 	    var taskCount = 0
@@ -67,8 +69,8 @@ class CoroutineQueue<T>(
 		while (task != null) {
 			// Wait for the task to complete
 			task.await()
-			// Increment the counter
-			++taskCount
+			// Increment the counter, check if limit is reached
+			if (++taskCount == limit) return limit
 			// Get the next task
 			task = mQueue.poll()
 		}
