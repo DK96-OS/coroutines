@@ -33,7 +33,7 @@ class CoroutineQueueCompanionTest {
 	@Test
 	fun testTransformListEmptyList() {
 		runBlocking {
-			val result = transformList(emptyList<InputData>()) {
+			val result = transformList(this, emptyList<InputData>()) {
 				it.transform()
 			}
 			assertEquals(
@@ -50,7 +50,7 @@ class CoroutineQueueCompanionTest {
 			)
 		)
 		runBlocking {
-			val result = transformList(input) {
+			val result = transformList(this, input) {
 				it.transform()
 			}
 			assertEquals(
@@ -70,7 +70,7 @@ class CoroutineQueueCompanionTest {
 			)
 		)
 		runBlocking {
-			val result: ArrayList<OutputData> = transformList(input) {
+			val result: ArrayList<OutputData> = transformList(this, input) {
 				it.transform()
 				null
 			}
@@ -83,7 +83,7 @@ class CoroutineQueueCompanionTest {
 	@Test
 	fun testTransformListFunction() {
 		runBlocking {
-			val output = transformList(inputList) {
+			val output = transformList(this, inputList) {
 				it.transform()
 			}
 			assertEquals(
@@ -103,6 +103,7 @@ class CoroutineQueueCompanionTest {
 				1, 2, 3, 4, 5, 6
 			)
 			val output = transformList(
+				this,
 				nullTestInputs
 			) {
 				when {
@@ -129,7 +130,7 @@ class CoroutineQueueCompanionTest {
 	@Test
 	fun testTransformArray() {
 		runBlocking {
-			val output = transformArray(inputArray) {
+			val output = transformArray(this, inputArray) {
 				it.transform()
 			}
 			assertEquals(
@@ -148,7 +149,7 @@ class CoroutineQueueCompanionTest {
 			InputData(77, byteArrayOf(4, 2, 4, 6))
 		}
 		runBlocking {
-			val output = transformArray(input) {
+			val output = transformArray(this, input) {
 				it.transform()
 			}
 			assertEquals(
@@ -167,12 +168,27 @@ class CoroutineQueueCompanionTest {
 	}
 
 	@Test
+	fun testTransformArrayEmpty() {
+		val input = Array(0) {
+			InputData(77, byteArrayOf(4, 2, 4, 6))
+		}
+		runBlocking {
+			val output = transformArray(this, input) {
+				it.transform()
+			}
+			assertEquals(
+				0, output.size
+			)
+		}
+	}
+
+	@Test
 	fun testTransformArraySingleNull() {
 		val input = Array(1) {
 			InputData(77, byteArrayOf(4, 2, 4, 6))
 		}
 		runBlocking {
-			val output: ArrayList<OutputData> = transformArray(input) {
+			val output: ArrayList<OutputData> = transformArray(this, input) {
 				null
 			}
 			assertEquals(

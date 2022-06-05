@@ -9,6 +9,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.math.roundToInt
@@ -57,20 +58,24 @@ class CoroutineQueueTest {
 		}
 		println("Output ready: ${System.nanoTime()}")
 		assertEquals(
-			capacity, output.size)
+			capacity, output.size
+		)
 		for (out in output)
 			assertEquals(
-				64, out.title.length)
+				64, out.title.length
+			)
 			// Now sort the times, check their differences
 		val sortedList = output.sortedBy {
 			it.createTime
 		}
 		val diffTimeList = ArrayList<Int>(
-			sortedList.size - 1)
+			sortedList.size - 1
+		)
 		for (i in 1 until sortedList.size) {
 			val diff = sortedList[i].createTime - sortedList[i - 1].createTime
 			diffTimeList.add(
-				diff.toInt())	// Diffs are small enough to be Int
+				diff.toInt()
+			)	// Diffs are small enough to be Int
 		}
 		println("Shortest Diff: ${diffTimeList.minOrNull()}")
 		println("Average Diff: ${diffTimeList.average().roundToInt()}")
@@ -79,20 +84,88 @@ class CoroutineQueueTest {
 
 	@Test
 	fun testAwaitAll() {
+		// Load results into this arrayList
+		val array = ArrayList<OutputData>(capacity)
 		// Await All does not return a value
 		runBlocking {
-			// Load results into this arrayList
-			val array = ArrayList<OutputData>(capacity)
 			// Start Coroutines
 			for (i in inputList) queue.add(async {
 				val output = i.transform()
 				array.add(output)
 				output
 			})
-			// Await
-			queue.awaitAll()
+			// Await all returns count of completed tasks
 			assertEquals(
-				capacity, array.size)
+				capacity, queue.awaitAll()
+			)
+		}
+		assertEquals(
+			capacity, array.size
+		)
+	}
+
+	@Test
+	fun testAwaitAllEmptyQueue() {
+		runBlocking {
+			assertEquals(
+				0, queue.awaitAll()
+			)
+		}
+	}
+
+	@Test
+	fun testAwaitAllLimit5() {
+		runBlocking {
+			for (input in inputList) {
+				val task = async {
+					input.transform()
+				}
+				assertTrue(
+					queue.add(task)
+				)
+			}
+			assertEquals(
+				capacity, queue.count
+			)
+			// Wait for 5 tasks
+			assertEquals(
+				5, queue.awaitAll(5)
+			)
+			assertEquals(
+				capacity - 5, queue.count
+			)
+			// Check the new first item in the Queue
+			assertEquals(
+				inputList[5].key,
+				queue.awaitNext()!!.key
+			)
+		}
+	}
+
+	@Test
+	fun testAwaitAllLimit500() {
+		runBlocking {
+			for (input in inputList) {
+				val task = async {
+					input.transform()
+				}
+				assertTrue(
+					queue.add(task)
+				)
+			}
+			assertEquals(
+				capacity, queue.count
+			)
+			// Wait for maximum 500 tasks, more than capacity
+			assertEquals(
+				capacity, queue.awaitAll(500)
+			)
+			assertEquals(
+				0, queue.count
+			)
+			assertNull(
+				queue.awaitNext()
+			)
 		}
 	}
 
@@ -105,14 +178,16 @@ class CoroutineQueueTest {
 			var counter = queue.count	// Count down to zero
 			while (counter-- > 0)
 				assertNotNull(
-					queue.awaitNext())
+					queue.awaitNext()
+				)
 			assertNull(
-				queue.awaitNext())
+				queue.awaitNext()
+			)
 		}
 	}
 
 	@Test
-    fun testCancel() {
+	fun testCancelAll() {
 		runBlocking {
 			for (i in inputList) queue.add(async {
 				i.transform()
@@ -121,15 +196,55 @@ class CoroutineQueueTest {
 				inputList[0].key,
 				queue.awaitNext()!!.key
 			)
+			val remainingTasks = capacity - 1
 			assertEquals(
-				capacity - 1, queue.count)
-			queue.cancel(
-				CancellationException("Testing Cancel Operation"))
+				remainingTasks, queue.count
+			)
+			val cancelledTasks = queue.cancel(
+				CancellationException("Testing Cancel Operation")
+			)
 			assertEquals(
-				0, queue.count)
+				remainingTasks, cancelledTasks
+			)
+			assertEquals(
+				0, queue.count
+			)
 			assertNull(
-				queue.awaitNext())
+				queue.awaitNext()
+			)
 		}
+	}
+
+	@Test
+    fun testCancelSingle() {
+		val input = inputList[0]
+		runBlocking {
+			val task = async {
+				input.transform()
+			}
+			queue.add(task)
+			assertEquals(
+				1, queue.count
+			)
+			// Cancel and check Task result
+			val exception = CancellationException("Testing Cancel Operation")
+			assertEquals(
+				1, queue.cancel(exception)
+			)
+			assertTrue(
+				task.isCancelled
+			)
+			assertEquals(
+				0, queue.count
+			)
+		}
+	}
+
+	@Test
+	fun testCancelEmptyQueue() {
+		assertEquals(
+			0, queue.cancel()
+		)
 	}
 
 	@Test
@@ -139,13 +254,14 @@ class CoroutineQueueTest {
 				i.transform()
 			})
 			queue.cancel()
-				// Now Retry
+			// Now Retry
 			for (i in inputList) queue.add(async {
 				i.transform()
 			})
 			val output = queue.awaitList()
 			assertEquals(
-				capacity, output.size)
+				capacity, output.size
+			)
 			for (out in output)
 				assertEquals(
 					64, out.title.length
