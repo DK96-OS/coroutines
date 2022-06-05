@@ -129,7 +129,7 @@ class CoroutineQueueCompanionTest {
 	@Test
 	fun testTransformArray() {
 		runBlocking {
-			val output = transformArray(inputArray) {
+			val output = transformArray(this, inputArray) {
 				it.transform()
 			}
 			assertEquals(
@@ -148,7 +148,7 @@ class CoroutineQueueCompanionTest {
 			InputData(77, byteArrayOf(4, 2, 4, 6))
 		}
 		runBlocking {
-			val output = transformArray(input) {
+			val output = transformArray(this, input) {
 				it.transform()
 			}
 			assertEquals(
@@ -172,7 +172,7 @@ class CoroutineQueueCompanionTest {
 			InputData(77, byteArrayOf(4, 2, 4, 6))
 		}
 		runBlocking {
-			val output = transformArray(input) {
+			val output = transformArray(this, input) {
 				it.transform()
 			}
 			assertEquals(
@@ -187,7 +187,7 @@ class CoroutineQueueCompanionTest {
 			InputData(77, byteArrayOf(4, 2, 4, 6))
 		}
 		runBlocking {
-			val output: ArrayList<OutputData> = transformArray(input) {
+			val output: ArrayList<OutputData> = transformArray(this, input) {
 				null
 			}
 			assertEquals(
