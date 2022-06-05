@@ -114,6 +114,62 @@ class CoroutineQueueTest {
 	}
 
 	@Test
+	fun testAwaitAllLimit5() {
+		runBlocking {
+			for (input in inputList) {
+				val task = async {
+					input.transform()
+				}
+				assertTrue(
+					queue.add(task)
+				)
+			}
+			assertEquals(
+				capacity, queue.count
+			)
+			// Wait for 5 tasks
+			assertEquals(
+				5, queue.awaitAll(5)
+			)
+			assertEquals(
+				capacity - 5, queue.count
+			)
+			// Check the new first item in the Queue
+			assertEquals(
+				inputList[5].key,
+				queue.awaitNext()!!.key
+			)
+		}
+	}
+
+	@Test
+	fun testAwaitAllLimit500() {
+		runBlocking {
+			for (input in inputList) {
+				val task = async {
+					input.transform()
+				}
+				assertTrue(
+					queue.add(task)
+				)
+			}
+			assertEquals(
+				capacity, queue.count
+			)
+			// Wait for maximum 500 tasks, more than capacity
+			assertEquals(
+				capacity, queue.awaitAll(500)
+			)
+			assertEquals(
+				0, queue.count
+			)
+			assertNull(
+				queue.awaitNext()
+			)
+		}
+	}
+
+	@Test
     fun testAwaitNext() {
 		runBlocking {
 			for (i in inputList) queue.add(async {
