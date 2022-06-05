@@ -167,6 +167,21 @@ class CoroutineQueueCompanionTest {
 	}
 
 	@Test
+	fun testTransformArrayEmpty() {
+		val input = Array(0) {
+			InputData(77, byteArrayOf(4, 2, 4, 6))
+		}
+		runBlocking {
+			val output = transformArray(input) {
+				it.transform()
+			}
+			assertEquals(
+				0, output.size
+			)
+		}
+	}
+
+	@Test
 	fun testTransformArraySingleNull() {
 		val input = Array(1) {
 			InputData(77, byteArrayOf(4, 2, 4, 6))
