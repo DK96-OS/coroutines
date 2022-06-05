@@ -9,7 +9,7 @@ import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.CancellationException
 import kotlin.collections.ArrayList
 
-/** Simple Queue for awaiting asynchronous coroutines
+/** A Queue for organizing asynchronous coroutines.
  * @author DK96-OS : 2021 - 2022
  */
 class CoroutineQueue<T>(
@@ -26,14 +26,15 @@ class CoroutineQueue<T>(
 		get() = mQueue.size
 	
 	/** Add a deferred result to the Queue.
+	 * @param task The Task to be inserted into the Queue.
 	 * @return True if the queue allowed the task to be added (didn't exceed capacity)
 	 */
 	fun add(
 		task: Deferred<T?>
 	) : Boolean = mQueue.offer(task)
 
-	/** Block until next coroutine finishes, 
-	 * @return null if empty queue or task result is nullable.
+	/** Wait for the first coroutine in the Queue, return it's result..
+	 * @return The result of the first task, or null if Queue is empty.
 	 */
 	suspend fun awaitNext()
 	: T? = mQueue.poll()?.await()
@@ -74,9 +75,11 @@ class CoroutineQueue<T>(
 	    return taskCount
 	}
 
-	/** Tries to cancel everything in the queue */
+	/** Tries to cancel everything in the queue.
+	 * @param cause An Exception to be passed to all cancelled tasks.
+	 */
 	fun cancel(
-		cause: CancellationException? = null
+		cause: CancellationException? = null,
 	) {
 		mQueue.forEach { it.cancel(cause) }
 		mQueue.clear()
