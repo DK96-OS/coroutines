@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import java.util.*
-import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.CancellationException
 
 /** A Queue for organizing asynchronous coroutines.
@@ -18,9 +17,7 @@ class CoroutineQueue<T>(
 ) {
 	
     private val mQueue
-    : Queue<Deferred<T?>> = ArrayBlockingQueue(
-	    capacity, true
-    )
+    : Deque<Deferred<T?>> = ArrayDeque(capacity)
 
 	val count: Int
 		get() = mQueue.size
