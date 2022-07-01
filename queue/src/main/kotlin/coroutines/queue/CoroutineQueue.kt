@@ -6,22 +6,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import java.util.*
-import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.CancellationException
 
 /** A Queue for organizing asynchronous coroutines.
  * @author DK96-OS : 2021 - 2022
  */
 class CoroutineQueue<T>(
-	/** The maximum number of coroutines allowed in the queue at one time. */
+	/** The maximum number of coroutines allowed in the queue at one time.
+	 * If this value is zero or negative, the capacity is unlimited.
+	 */
 	val capacity: Int,
 ) {
 	
     private val mQueue
-    : Queue<Deferred<T?>> = ArrayBlockingQueue(
-	    capacity, true
-    )
+    : Deque<Deferred<T?>> = ArrayDeque(capacity)
 
+	/** The number of Coroutines currently in the queue.
+	 */
 	val count: Int
 		get() = mQueue.size
 	
@@ -31,7 +32,16 @@ class CoroutineQueue<T>(
 	 */
 	fun add(
 		task: Deferred<T?>
-	) : Boolean = mQueue.offer(task)
+	) : Boolean {
+		// If there is no capacity
+		if (capacity < 1)
+			return mQueue.add(task)
+		// Check capacity
+		if (mQueue.size < capacity)
+			return mQueue.offer(task)
+		// Queue is at Capacity
+		return false
+	}
 
 	/** Wait for the first coroutine in the Queue, return it's result..
 	 * @return The result of the first task, or null if Queue is empty.

@@ -1,16 +1,22 @@
 # Coroutines
 
-This Repository is here to provide __Coroutine__ powered data processing structures.
+This Repository provides __Coroutine__ powered data processing structures.
 
 ## Coroutine Queue
-The first data processing structure to be designed and created. It allows a set number of 
-Coroutines to be launched asynchronously, while maintaining a record of the order that the 
-coroutines were added to the Queue.
+The Queue is the first data structure that maintains an ordered collection of 
+Coroutines. It can be constructed with a fixed capacity, or be allowed to hold an
+unlimited number of coroutines.
 
+### Queue Methods
+Coroutine results can be recovered from the queue using the `awaitNext` or `awaitList` methods.
 
-The benefit of this is that the output of a set of coroutines can be structured, and ordered 
-predictably.
+The `awaitAll` method will discard the Deferred results, but will wait for each coroutine to finish.
+It has an optional parameter that limits the number of coroutine results to be discarded.
 
+The `cancel` method will interrupt all running coroutines, and discard everything in the queue.
 
+### Static Queue Methods
 The Queue can perform a transformation on the items in a List asynchronously using the 
-`transformList` method.
+`transformList` method. Similarly, the Queue can transform an array using the `transformArray` method.
+
+Both of these methods are static, and will construct a fixed size queue to process the input.

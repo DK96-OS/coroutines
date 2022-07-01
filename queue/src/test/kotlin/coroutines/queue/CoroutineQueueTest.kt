@@ -6,10 +6,7 @@ import coroutines.examples.TestDataProvider
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.math.roundToInt
@@ -145,14 +142,10 @@ class CoroutineQueueTest {
 	@Test
 	fun testAwaitAllLimit500() {
 		runBlocking {
-			for (input in inputList) {
-				val task = async {
-					input.transform()
-				}
+			for (input in inputList)
 				assertTrue(
-					queue.add(task)
+					queue.add(async { input.transform() })
 				)
-			}
 			assertEquals(
 				capacity, queue.count
 			)
@@ -172,9 +165,10 @@ class CoroutineQueueTest {
 	@Test
     fun testAwaitNext() {
 		runBlocking {
-			for (i in inputList) queue.add(async {
-				i.transform()
-			})
+			for (i in inputList)
+				assertTrue(
+					queue.add(async { i.transform() })
+				)
 			var counter = queue.count	// Count down to zero
 			while (counter-- > 0)
 				assertNotNull(
@@ -266,6 +260,23 @@ class CoroutineQueueTest {
 				assertEquals(
 					64, out.title.length
 				)
+		}
+	}
+
+	@Test
+	fun testAddExceedsCapacity() {
+		runBlocking {
+			for (i in inputList)
+				assertTrue(
+					queue.add(async { i.transform() })
+				)
+			//
+			assertFalse(
+				queue.add(async { inputList[0].transform() })
+			)
+			assertEquals(
+				capacity, queue.count
+			)
 		}
 	}
 
