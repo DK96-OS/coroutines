@@ -49,22 +49,36 @@ class CoroutineQueue<T>(
 	suspend fun awaitNext()
 	: T? = mQueue.poll()?.await()
 
-	/** Await each element in the queue, add it to a list and return the list
+	/** Await each element in the queue, add it to a list and return the list.
+	 * @param limit The maximum number of elements to include in the list. 0 (or negative) is unlimited.
+	 * @param countNull Whether null deferred results count towards the limit.
 	 * @return An ArrayList containing the results of all tasks in the queue.
 	 */
-	suspend fun awaitList()
-	: ArrayList<T> {
+	suspend fun awaitList(
+		limit: Int = 0,
+		countNull: Boolean = true,
+	) : ArrayList<T> {
+		val expectedSize: Int = if (limit < 1)
+			mQueue.size
+		else
+			minOf(limit, mQueue.size)
+		//
+		val list = ArrayList<T>(expectedSize)
 		var task: Deferred<T?>? = mQueue.poll()
-		val list = ArrayList<T>(mQueue.count())
+		var counter = 0
 		while (task != null) {
 			val result = task.await()
-			if (result != null)
-				list.add(result)
+			when {
+				result != null -> {
+					list.add(result)
+					if (limit > 0 && ++counter >= limit) return list
+				}
+				limit > 0 && countNull && ++counter >= limit -> return list
+			}
 			task = mQueue.poll()
 		}
 		return list
 	}
-
     /** Wait for a group of tasks to complete.
      * @param limit The maximum number of tasks to wait for. zero is unlimited.
      * @return The number of tasks that were waited on.
