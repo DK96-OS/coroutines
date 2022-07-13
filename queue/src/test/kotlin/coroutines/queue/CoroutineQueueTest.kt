@@ -23,7 +23,7 @@ class CoroutineQueueTest {
 
 	/** The capacity is the size of the input list.
 	 */
-	private val capacity = 400
+	private val capacity = 100
 
 	/** A CoroutineQueue instance created before each test.
 	 */
