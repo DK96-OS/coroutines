@@ -1,8 +1,5 @@
 package coroutines.queue
 
-import coroutines.examples.InputData
-import coroutines.examples.OutputData
-import coroutines.examples.TestDataProvider
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -17,41 +14,23 @@ import kotlin.math.roundToInt
  * @author DK96-OS : 2021 - 2022
  */
 @ExperimentalCoroutinesApi
-class CoroutineQueueTest {
+class CoroutineQueueTest
+	: QueueTestingTemplate(
+		inputDataSize = 100,
+	) {
 
-	private val provider = TestDataProvider()
-
-	/** The capacity is the size of the input list.
+	/** The capacity of the Queue.
 	 */
 	private val capacity = 100
 
-	/** A CoroutineQueue instance created before each test.
-	 */
-	private lateinit var queue: CoroutineQueue<OutputData>
-
-  	/** An immutable input data to be used in tests.
-     */
-	private val inputList: List<InputData> = provider.createInput(
-	    capacity, 300
-    ).toList()
-
 	@BeforeEach
-	fun setup() {
-		queue = CoroutineQueue(capacity)
+	fun testSetup() {
+		init(capacity)
     }
-
-	private fun addAllInputs() {
-		runTest {
-			for (i in inputList) {
-				val task = async { i.transform() }
-				queue.add(task)
-			}
-		}
-	}
 
 	@Test
 	fun testInputKeysArePositive() {
-		for (input in inputList)
+		for (input in input)
             assert(input.key >= 0)
 	}
 
@@ -59,7 +38,7 @@ class CoroutineQueueTest {
 	fun testAwaitList() {
 		val output = runBlocking {
 			println("Loadin Queue: ${System.nanoTime()}")
-			addAllInputs()
+			addAllInputData()
 			println("Filled Queue: ${System.nanoTime()}")
 			queue.awaitList()	// returns a list of the output type
 		}
@@ -91,7 +70,7 @@ class CoroutineQueueTest {
 
 	@Test
 	fun testAwaitListLimit5() {
-		addAllInputs()
+		addAllInputData()
 		val limit = 5
 		runTest {
 			val resultList = queue.awaitList(limit)
@@ -106,7 +85,7 @@ class CoroutineQueueTest {
 
 	@Test
 	fun testAwaitListLimitNegative() {
-		addAllInputs()
+		addAllInputData()
 		val limit = -5
 		runTest {
 			val resultList = queue.awaitList(limit)
@@ -134,7 +113,7 @@ class CoroutineQueueTest {
 
 	@Test
 	fun testAwaitListQueueSizeBelowLimit() {
-		addAllInputs()
+		addAllInputData()
 		runTest {
 			val result = queue.awaitList(capacity + 1)
 			assertEquals(
@@ -163,7 +142,7 @@ class CoroutineQueueTest {
 
 	@Test
 	fun testAwaitAllFullQueue() {
-		addAllInputs()
+		addAllInputData()
 		assertEquals(
 			capacity, queue.count
 		)
@@ -179,7 +158,7 @@ class CoroutineQueueTest {
 
 	@Test
 	fun testAwaitAllLimit5() {
-		addAllInputs()
+		addAllInputData()
 		assertEquals(
 			capacity, queue.count
 		)
@@ -194,7 +173,7 @@ class CoroutineQueueTest {
 			)
 			// Check the new first item in the Queue
 			assertEquals(
-				inputList[limit].key,
+				input[limit].key,
 				queue.awaitNext()!!.key
 			)
 		}
@@ -202,7 +181,7 @@ class CoroutineQueueTest {
 
 	@Test
 	fun testAwaitAllLimitAboveCapacity() {
-		addAllInputs()
+		addAllInputData()
 		assertEquals(
 			capacity, queue.count
 		)
@@ -222,7 +201,7 @@ class CoroutineQueueTest {
 
 	@Test
     fun testAwaitNext() {
-		addAllInputs()
+		addAllInputData()
 		runTest {
 			var counter = queue.count	// Count down to zero
 			while (counter-- > 0)
@@ -237,10 +216,10 @@ class CoroutineQueueTest {
 
 	@Test
 	fun testCancelAll() {
-		addAllInputs()
+		addAllInputData()
 		runTest {
 			assertEquals(
-				inputList[0].key,
+				input[0].key,
 				queue.awaitNext()!!.key
 			)
 			val remainingTasks = capacity - 1
@@ -264,7 +243,7 @@ class CoroutineQueueTest {
 
 	@Test
     fun testCancelSingle() {
-		val input = inputList[0]
+		val input = input[0]
 		runTest {
 			val task = async {
 				input.transform()
@@ -296,9 +275,9 @@ class CoroutineQueueTest {
 
 	@Test
     fun testReusability() {
-		addAllInputs()
+		addAllInputData()
 		queue.cancel()
-		addAllInputs()
+		addAllInputData()
 		val output = runBlocking { queue.awaitList() }
 		assertEquals(
 			capacity, output.size
@@ -311,13 +290,13 @@ class CoroutineQueueTest {
 
 	@Test
 	fun testAddExceedsCapacity() {
-		addAllInputs()
+		addAllInputData()
 		assertEquals(
 			capacity, queue.count
 		)
 		runTest {
 			assertFalse(
-				queue.add(async { inputList[0].transform() })
+				queue.add(async { input[0].transform() })
 			)
 		}
 		assertEquals(
