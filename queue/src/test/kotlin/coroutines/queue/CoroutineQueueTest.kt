@@ -120,6 +120,32 @@ class CoroutineQueueTest {
 	}
 
 	@Test
+	fun testAwaitListEmptyQueue() {
+		runTest {
+			val result = queue.awaitList()
+			assertEquals(
+				0, result.size
+			)
+			assertEquals(
+				0, queue.count
+			)
+		}
+	}
+
+	@Test
+	fun testAwaitListQueueSizeBelowLimit() {
+		runTest {
+			val result = queue.awaitList(capacity + 1)
+			assertEquals(
+				capacity, result.size
+			)
+			assertEquals(
+				0, queue.count
+			)
+		}
+	}
+
+	@Test
 	fun testAwaitAllEmptyQueue() {
 		runTest {
 			assertEquals(
