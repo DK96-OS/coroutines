@@ -2,7 +2,6 @@ package coroutines.queue
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import java.util.*
@@ -58,27 +57,47 @@ class CoroutineQueue<T>(
 		limit: Int = 0,
 		countNull: Boolean = true,
 	) : ArrayList<T> {
-		val expectedSize: Int = if (limit < 1)
-			mQueue.size
-		else
-			minOf(limit, mQueue.size)
+		val unlimited = limit < 1
+		val queueSize = mQueue.size
 		//
+		val expectedSize: Int = when {
+			queueSize == 0 -> return ArrayList<T>()
+			unlimited -> queueSize
+			limit <= queueSize -> limit
+			else -> queueSize
+		}
 		val list = ArrayList<T>(expectedSize)
+		//
 		var task: Deferred<T?>? = mQueue.poll()
 		var counter = 0
-		while (task != null) {
-			val result = task.await()
-			when {
-				result != null -> {
-					list.add(result)
-					if (limit > 0 && ++counter >= limit) return list
-				}
-				limit > 0 && countNull && ++counter >= limit -> return list
+		if (unlimited)
+			while (task != null) {
+				val result = task.await()
+				if (result != null) list.add(result)
+				// Obtain next task
+				task = mQueue.poll()
 			}
-			task = mQueue.poll()
-		}
+		else
+			while (task != null) {
+				val result = task.await()
+				when {
+					result != null -> {
+						list.add(result)
+						if (++counter >= limit) return list
+					}
+					countNull -> {
+						if (++counter >= limit) return list
+					}
+					else -> {
+						// Result was null, and nulls do not count towards limit
+					}
+				}
+				// Obtain next Task
+				task = mQueue.poll()
+			}
 		return list
 	}
+
     /** Wait for a group of tasks to complete.
      * @param limit The maximum number of tasks to wait for. zero is unlimited.
      * @return The number of tasks that were waited on.
@@ -138,11 +157,10 @@ class CoroutineQueue<T>(
 		) : ArrayList<B> {
 			if (1 < input.size) {
 				val queue = CoroutineQueue<B>(input.size)
-				input.forEach { a ->
-					queue.add(coroutineScope.async(Dispatchers.IO) {
-						transform(a)
+				for (i in input)
+					queue.add(coroutineScope.async {
+						transform(i)
 					})
-				}
 				return runBlocking { queue.awaitList() }
 			} else if (input.size == 1) {
 				// The input list has only one element
@@ -176,7 +194,7 @@ class CoroutineQueue<T>(
 			} else {
 				val queue = CoroutineQueue<B>(input.size)
 				input.forEach { a ->
-					queue.add(coroutineScope.async(Dispatchers.IO) {
+					queue.add(coroutineScope.async {
 						transform(a)
 					})
 				}

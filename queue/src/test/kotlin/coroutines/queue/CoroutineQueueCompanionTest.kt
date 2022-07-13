@@ -155,7 +155,7 @@ class CoroutineQueueCompanionTest {
 			assertEquals(
 				1, output.size
 			)
-			val expectedOutput = input[0].transform()
+			val expectedOutput = input[0].transform()!!
 			assertEquals(
 				expectedOutput.key,
 				output[0].key
