@@ -134,6 +134,7 @@ class CoroutineQueueTest {
 
 	@Test
 	fun testAwaitListQueueSizeBelowLimit() {
+		addAllInputs()
 		runTest {
 			val result = queue.awaitList(capacity + 1)
 			assertEquals(
