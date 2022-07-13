@@ -8,9 +8,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import kotlin.math.roundToInt
 
-/** Test suite for CoroutineQueue
+/** Testing [CoroutineQueue]
  * @author DK96-OS : 2021 - 2022
  */
 @ExperimentalCoroutinesApi
@@ -32,40 +31,6 @@ class CoroutineQueueTest
 	fun testInputKeysArePositive() {
 		for (input in input)
             assert(input.key >= 0)
-	}
-
-	@Test
-	fun testAwaitList() {
-		val output = runBlocking {
-			println("Loadin Queue: ${System.nanoTime()}")
-			addAllInputData()
-			println("Filled Queue: ${System.nanoTime()}")
-			queue.awaitList()	// returns a list of the output type
-		}
-		println("Output ready: ${System.nanoTime()}")
-		assertEquals(
-			capacity, output.size
-		)
-		for (out in output)
-			assertEquals(
-				64, out.title.length
-			)
-			// Now sort the times, check their differences
-		val sortedList = output.sortedBy {
-			it.createTime
-		}
-		val diffTimeList = ArrayList<Int>(
-			sortedList.size - 1
-		)
-		for (i in 1 until sortedList.size) {
-			val diff = sortedList[i].createTime - sortedList[i - 1].createTime
-			diffTimeList.add(
-				diff.toInt()
-			)	// Diffs are small enough to be Int
-		}
-		println("Shortest Diff: ${diffTimeList.minOrNull()}")
-		println("Average Diff: ${diffTimeList.average().roundToInt()}")
-		println("Longest Diff: ${diffTimeList.maxOrNull()}")
 	}
 
 	@Test
@@ -121,6 +86,72 @@ class CoroutineQueueTest
 			)
 			assertEquals(
 				0, queue.count
+			)
+		}
+	}
+
+	@Test
+	fun testAwaitListCountNullResults() {
+		// Prepare results with first 10 non-null, then 20 null, then all non-null
+		runTest {
+			var i = 0
+			while (i < 10) {
+				val inputData = input[i++]
+				val task = async { inputData.transform() }
+				queue.add(task)
+			}
+			while (i < 30) {
+				val inputData = input[i++]
+				val task = async { inputData.transform(true) }
+				queue.add(task)
+			}
+			while (i < inputDataSize) {
+				val inputData = input[i++]
+				val task = async { inputData.transform() }
+				queue.add(task)
+			}
+		}
+		// Get the first 20 task results, while counting null values
+		runTest {
+			val results = queue.awaitList(20, true)
+			assertEquals(
+				10, results.size
+			)
+			assertEquals(
+				80, queue.count
+			)
+		}
+	}
+
+	@Test
+	fun testAwaitListNoNullResults() {
+		// Prepare results with first 10 non-null, then 20 null, then all non-null
+		runTest {
+			var i = 0
+			while (i < 10) {
+				val inputData = input[i++]
+				val task = async { inputData.transform() }
+				queue.add(task)
+			}
+			while (i < 30) {
+				val inputData = input[i++]
+				val task = async { inputData.transform(true) }
+				queue.add(task)
+			}
+			while (i < inputDataSize) {
+				val inputData = input[i++]
+				val task = async { inputData.transform() }
+				queue.add(task)
+			}
+		}
+		// Get the first 20 non-null task results
+		runTest {
+			val results = queue.awaitList(20, false)
+			assertEquals(
+				20, results.size
+			)
+			assertEquals(
+				60, queue.count
 			)
 		}
 	}
