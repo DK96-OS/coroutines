@@ -1,9 +1,8 @@
 package coroutines.queue
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.coroutineScope
 import java.util.*
 import java.util.concurrent.CancellationException
 
@@ -154,18 +153,16 @@ class CoroutineQueue<T>(
 			input: List<A>,
 			transform: suspend (A) -> B?
 		) : ArrayList<B> {
-			if (1 < input.size) withContext {
+			if (1 < input.size) coroutineScope {
 				val queue = CoroutineQueue<B>(input.size)
 				for (i in input)
 					queue.add(async {
 						transform(i)
 					})
-				return queue.awaitList()
+				queue.awaitList()
 			} else if (input.size == 1) {
 				// The input list has only one element
-				val result = runBlocking {
-					transform(input[0])
-				}
+				val result = transform(input[0])
 				if (result != null)
 					return arrayListOf(result)
 			}
@@ -185,20 +182,18 @@ class CoroutineQueue<T>(
 		) : ArrayList<B> {
 			if (input.size < 2) {
 				if (input.size == 1) {
-					val result = runBlocking {
-						transform(input[0])
-					}
+					val result = transform(input[0])
 					if (result != null)
 						return arrayListOf(result)
 				}
-			} else withContext {
+			} else coroutineScope {
 				val queue = CoroutineQueue<B>(input.size)
 				input.forEach { a ->
 					queue.add(async {
 						transform(a)
 					})
 				}
-				return runBlocking { queue.awaitList() }
+				queue.awaitList()
 			}
 			// By default, return new empty ArrayList
 			return ArrayList(0)
