@@ -153,7 +153,7 @@ class CoroutineQueue<T>(
 			input: List<A>,
 			transform: suspend (A) -> B?
 		) : ArrayList<B> {
-			if (1 < input.size) coroutineScope {
+			if (1 < input.size) return coroutineScope {
 				val queue = CoroutineQueue<B>(input.size)
 				for (i in input)
 					queue.add(async {
@@ -186,7 +186,7 @@ class CoroutineQueue<T>(
 					if (result != null)
 						return arrayListOf(result)
 				}
-			} else coroutineScope {
+			} else return coroutineScope {
 				val queue = CoroutineQueue<B>(input.size)
 				input.forEach { a ->
 					queue.add(async {
