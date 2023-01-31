@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 /** Testing the CoroutineQueue Companion.
- * @author DK96-OS : 2022
+ * @author DK96-OS : 2022 - 2023
  */
 class CoroutineQueueCompanionTest {
 

@@ -8,7 +8,7 @@ import java.util.*
 import java.util.concurrent.CancellationException
 
 /** A Queue for organizing asynchronous coroutines.
- * @author DK96-OS : 2021 - 2022
+ * @author DK96-OS : 2021 - 2023
  */
 class CoroutineQueue<T>(
 	/** The maximum number of coroutines allowed in the queue at one time.
@@ -150,21 +150,22 @@ class CoroutineQueue<T>(
 		 * @param transform The suspending transformation operation.
 		 * @return A new ArrayList containing the non-null transformation products.
 		 */
-		fun <A, B> transformList(
-			coroutineScope: CoroutineScope,
+		suspend fun <A, B> transformList(
 			input: List<A>,
 			transform: suspend (A) -> B?
 		) : ArrayList<B> {
-			if (1 < input.size) {
+			if (1 < input.size) withContext {
 				val queue = CoroutineQueue<B>(input.size)
 				for (i in input)
-					queue.add(coroutineScope.async {
+					queue.add(async {
 						transform(i)
 					})
-				return runBlocking { queue.awaitList() }
+				return queue.awaitList()
 			} else if (input.size == 1) {
 				// The input list has only one element
-				val result = runBlocking { transform(input[0]) }
+				val result = runBlocking {
+					transform(input[0])
+				}
 				if (result != null)
 					return arrayListOf(result)
 			}
@@ -178,8 +179,7 @@ class CoroutineQueue<T>(
 		 * @param transform The suspending transformation operation.
 		 * @return A new ArrayList containing the non-null transformation products.
 		 */
-		fun <A, B> transformArray(
-			coroutineScope: CoroutineScope,
+		suspend fun <A, B> transformArray(
 			input: Array<A>,
 			transform: suspend (A) -> B?,
 		) : ArrayList<B> {
@@ -191,10 +191,10 @@ class CoroutineQueue<T>(
 					if (result != null)
 						return arrayListOf(result)
 				}
-			} else {
+			} else withContext {
 				val queue = CoroutineQueue<B>(input.size)
 				input.forEach { a ->
-					queue.add(coroutineScope.async {
+					queue.add(async {
 						transform(a)
 					})
 				}
