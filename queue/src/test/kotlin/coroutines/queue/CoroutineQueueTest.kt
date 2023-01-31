@@ -10,7 +10,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 /** Testing [CoroutineQueue]
- * @author DK96-OS : 2021 - 2022
+ * @author DK96-OS : 2021 - 2023
  */
 @ExperimentalCoroutinesApi
 class CoroutineQueueTest

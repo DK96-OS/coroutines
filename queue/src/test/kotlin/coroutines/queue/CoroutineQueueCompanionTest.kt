@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 /** Testing the CoroutineQueue Companion.
- * @author DK96-OS : 2022
+ * @author DK96-OS : 2022 - 2023
  */
 class CoroutineQueueCompanionTest {
 
@@ -33,7 +33,7 @@ class CoroutineQueueCompanionTest {
 	@Test
 	fun testTransformListEmptyList() {
 		runBlocking {
-			val result = transformList(this, emptyList<InputData>()) {
+			val result = transformList(emptyList<InputData>()) {
 				it.transform()
 			}
 			assertEquals(
@@ -50,7 +50,7 @@ class CoroutineQueueCompanionTest {
 			)
 		)
 		runBlocking {
-			val result = transformList(this, input) {
+			val result = transformList(input) {
 				it.transform()
 			}
 			assertEquals(
@@ -70,7 +70,7 @@ class CoroutineQueueCompanionTest {
 			)
 		)
 		runBlocking {
-			val result: ArrayList<OutputData> = transformList(this, input) {
+			val result: ArrayList<OutputData> = transformList(input) {
 				it.transform()
 				null
 			}
@@ -83,7 +83,7 @@ class CoroutineQueueCompanionTest {
 	@Test
 	fun testTransformListFunction() {
 		runBlocking {
-			val output = transformList(this, inputList) {
+			val output = transformList(inputList) {
 				it.transform()
 			}
 			assertEquals(
@@ -103,7 +103,6 @@ class CoroutineQueueCompanionTest {
 				1, 2, 3, 4, 5, 6
 			)
 			val output = transformList(
-				this,
 				nullTestInputs
 			) {
 				when {
@@ -130,7 +129,7 @@ class CoroutineQueueCompanionTest {
 	@Test
 	fun testTransformArray() {
 		runBlocking {
-			val output = transformArray(this, inputArray) {
+			val output = transformArray(inputArray) {
 				it.transform()
 			}
 			assertEquals(
@@ -149,7 +148,7 @@ class CoroutineQueueCompanionTest {
 			InputData(77, byteArrayOf(4, 2, 4, 6))
 		}
 		runBlocking {
-			val output = transformArray(this, input) {
+			val output = transformArray(input) {
 				it.transform()
 			}
 			assertEquals(
@@ -173,7 +172,7 @@ class CoroutineQueueCompanionTest {
 			InputData(77, byteArrayOf(4, 2, 4, 6))
 		}
 		runBlocking {
-			val output = transformArray(this, input) {
+			val output = transformArray(input) {
 				it.transform()
 			}
 			assertEquals(
@@ -188,7 +187,7 @@ class CoroutineQueueCompanionTest {
 			InputData(77, byteArrayOf(4, 2, 4, 6))
 		}
 		runBlocking {
-			val output: ArrayList<OutputData> = transformArray(this, input) {
+			val output: ArrayList<OutputData> = transformArray(input) {
 				null
 			}
 			assertEquals(
