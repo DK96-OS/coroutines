@@ -9,7 +9,7 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "daily"
-      time: "8:00"
+      time: "08:00"
     open-pull-requests-limit: 1
 
   - package-ecosystem: "gradle"
