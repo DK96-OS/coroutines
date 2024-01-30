@@ -29,7 +29,7 @@ jobs:
       timeout-minutes: 4
 
     - name: Upload Test Reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: success() || failure()
       with:
         name: Java-${{ matrix.java }}-Tests
