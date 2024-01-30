@@ -9,12 +9,12 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "daily"
-      time: "08:00"
-    open-pull-requests-limit: 1
+    open-pull-requests-limit: 2
 
-  - package-ecosystem: "gradle"
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "github-actions"
+    # Workflow files stored in the default location of `.github/workflows`. (You don't need to specify `/.github/workflows` for `directory`. You can use `directory: "/"`.)
+    directory: "/"
     schedule:
+      # Check for updates to GitHub Actions every weekday
       interval: "daily"
-      time: "20:00"
-    open-pull-requests-limit: 1
+    open-pull-requests-limit: 2
