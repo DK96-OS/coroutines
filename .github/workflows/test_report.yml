@@ -10,17 +10,12 @@ jobs:
     permissions:
       contents: read
     
-    strategy:
-      matrix:
-        java: [ '11', '17' ]
-    
-    name: Test - Java ${{ matrix.java }}
-
+    name: Test Report
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-java@v4
       with:
-        java-version: ${{ matrix.java }}
+        java-version: 17
         distribution: 'temurin'
         cache: 'gradle'
     
@@ -32,8 +27,8 @@ jobs:
       uses: actions/upload-artifact@v4
       if: success() || failure()
       with:
-        name: Java-${{ matrix.java }}-Tests
+        name: CoroutineQueue-TestReports
         path: /home/runner/work/coroutines/coroutines/queue/build/reports/
-        retention-days: 60
+        retention-days: 21
         if-no-files-found: error
       timeout-minutes: 1
