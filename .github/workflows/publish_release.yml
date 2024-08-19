@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'temurin'
           cache: 'gradle'
         
@@ -46,8 +46,8 @@ jobs:
         uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
-          name: JavaDocs-11
+          name: CoroutineQueue-JavaDocs
           path: |
             /home/runner/work/coroutines/coroutines/queue/build/dokka/
-          retention-days: 60
+          retention-days: 28
         timeout-minutes: 1
