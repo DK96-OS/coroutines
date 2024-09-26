@@ -12,7 +12,7 @@ The `CoroutineQueue` is a simple yet powerful class designed to manage and execu
 ## Usage
 To use the `CoroutineQueue`, first add the following dependency to your project's `build.gradle` file:
 ```groovy
-implementation "io.github.dk96-os.coroutines:queue:0.4.11"
+implementation "io.github.dk96-os.coroutines:queue:0.4.12"
 ```
 After adding the dependency, you can use the `CoroutineQueue` class in your Kotlin code as shown below:
 
