@@ -20,7 +20,7 @@ publishing {
 		maven(MavenPublication) {
 			groupId = "io.github.dk96-os.coroutines"
 			artifactId = "queue"
-			version = "0.4.12"
+			version = "0.4.13"
 			from components.java
 		}
 	}
@@ -32,7 +32,7 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0"
     
     // JUnit 5
-    testImplementation platform("org.junit:junit-bom:5.11.1")
+    testImplementation platform("org.junit:junit-bom:5.11.3")
     testImplementation "org.junit.jupiter:junit-jupiter-api"
     testImplementation "org.junit.jupiter:junit-jupiter-params"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
